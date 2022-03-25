@@ -62,12 +62,16 @@ resource "aws_eip" "nat_eip" {
 
 # CREATING THE NAT GATEWAY
 resource "aws_nat_gateway" "nat_gw" {
-  connectivity_type = "private"
-  subnet_id = aws_subnet.private.id
+  allocation_id = aws_eip.nat_eip.id
+  connectivity_type = "public"
+  subnet_id = aws_subnet.public.id
 
   tags = {
     Name = "Nat gw"
   }
+
+    # terraform waits for all the resources . Since it is a square bracket it is a list of resources
+  depends_on = [aws_internet_gateway.igw]
 }
 
 
@@ -85,7 +89,6 @@ resource "aws_route_table" "nat_route_table" {
     Name = "nat-route-table"
   }
 }
-
 
 resource "aws_route_table" "igw_route_table" {
   vpc_id = aws_vpc.main.id
@@ -106,8 +109,15 @@ resource "aws_route_table_association" "internet_route_table_association_app" {
   route_table_id = aws_route_table.nat_route_table.id
 }
 
-# ASSOCIATE ROUTE TABLE -- PUBLIC LAYER
+# ASSOCIATE ROUTE TABLE -- DATA LAYER
 resource "aws_route_table_association" "internet_route_table_association_public" {
+  subnet_id      = aws_subnet.database.id
+  route_table_id = aws_route_table.nat_route_table.id
+}
+
+# ASSOCIATE ROUTE TABLE -- PUBLIC LAYER
+resource "aws_route_table_association" "internet_route_table_association_data" {
   subnet_id      = aws_subnet.public.id
   route_table_id = aws_route_table.igw_route_table.id
 }
+
