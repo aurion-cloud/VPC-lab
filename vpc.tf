@@ -110,13 +110,13 @@ resource "aws_route_table_association" "internet_route_table_association_app" {
 }
 
 # ASSOCIATE ROUTE TABLE -- DATA LAYER
-resource "aws_route_table_association" "internet_route_table_association_public" {
+resource "aws_route_table_association" "internet_route_table_association_data" {
   subnet_id      = aws_subnet.database.id
   route_table_id = aws_route_table.nat_route_table.id
 }
 
 # ASSOCIATE ROUTE TABLE -- PUBLIC LAYER
-resource "aws_route_table_association" "internet_route_table_association_data" {
+resource "aws_route_table_association" "internet_route_table_association_public" {
   subnet_id      = aws_subnet.public.id
   route_table_id = aws_route_table.igw_route_table.id
 }
